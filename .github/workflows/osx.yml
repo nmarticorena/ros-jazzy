@@ -1,0 +1,87 @@
+jobs:
+  stage_0_job_0:
+    name: autoware-lint-common autoware-planning-msgs autoware-map-msgs autoware-perception-msgs
+      autoware-v2x-msgs
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+    needs: []
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Build ros-jazzy-autoware-lint-common ros-jazzy-autoware-planning-msgs
+        ros-jazzy-autoware-map-msgs ros-jazzy-autoware-perception-msgs ros-jazzy-autoware-v2x-msgs
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-jazzy-autoware-lint-common ros-jazzy-autoware-planning-msgs
+          ros-jazzy-autoware-map-msgs ros-jazzy-autoware-perception-msgs ros-jazzy-autoware-v2x-msgs
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/build_osx.sh
+  stage_0_job_1:
+    name: autoware-system-msgs autoware-sensing-msgs autoware-localization-msgs autoware-internal-msgs
+      autoware-control-msgs
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+    needs: []
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Build ros-jazzy-autoware-system-msgs ros-jazzy-autoware-sensing-msgs ros-jazzy-autoware-localization-msgs
+        ros-jazzy-autoware-internal-msgs ros-jazzy-autoware-control-msgs
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-jazzy-autoware-system-msgs ros-jazzy-autoware-sensing-msgs
+          ros-jazzy-autoware-localization-msgs ros-jazzy-autoware-internal-msgs ros-jazzy-autoware-control-msgs
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/build_osx.sh
+  stage_0_job_2:
+    name: autoware-common-msgs
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+    needs: []
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Build ros-jazzy-autoware-common-msgs
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-jazzy-autoware-common-msgs
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/build_osx.sh
+  stage_1_job_3:
+    name: autoware-cmake autoware-vehicle-msgs
+    runs-on: macos-13
+    strategy:
+      fail-fast: false
+    needs:
+    - stage_0_job_0
+    - stage_0_job_1
+    - stage_0_job_2
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Build ros-jazzy-autoware-cmake ros-jazzy-autoware-vehicle-msgs
+      env:
+        ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_API_TOKEN }}
+        CURRENT_RECIPES: ros-jazzy-autoware-cmake ros-jazzy-autoware-vehicle-msgs
+      run: |
+        export CI=azure
+        export GIT_BRANCH=$BUILD_SOURCEBRANCHNAME
+        export FEEDSTOCK_NAME=$(basename ${BUILD_REPOSITORY_NAME})
+        .scripts/build_osx.sh
+name: build_osx
+on:
+  push:
+    branches:
+    - buildbranch_osx
